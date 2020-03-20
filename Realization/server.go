@@ -4,18 +4,21 @@ import (
 	"mycopaka/iface"
 	"fmt"
 	"net"
+	"time"
 )
 
 type Server struct{
 	Host string
 	Port int
 	Name string
+	RouterHandle iface.IRouterHandel
 }
 func NewServer(host string,port int,name string)iface.IServer{
 	return &Server{
 		Host:host,
 		Port:port,
 		Name:name,
+		RouterHandle:NewRouterHandle(),
 	}
 }
 
@@ -26,18 +29,21 @@ func(s *Server)Start(){
 	if err != nil{
 		fmt.Println("[ERROR]Server run err:",err)
 	}
+
+	//给conn的自增id
+	AuToId := uint32(0)
+
+	//循环监听客户端连接
 	for {
 		conn,err := listener.Accept()
 		if err != nil{
 			fmt.Println("[ERROR]Conn open failed")
 		}
-		buf := make([]byte,512)
-		n,err := conn.Read(buf)
-		if err != nil {
-			fmt.Println("recv faild")
-		}
-		fmt.Println(string(buf[:n]))
 
+		//创建一个conn对象
+		connectionObject := NewConnection(conn,AuToId,s.RouterHandle)
+		//启动conn任务
+		go connectionObject.Start()
 	}
 }
 
@@ -48,4 +54,14 @@ func(s *Server)Serve(){
 	s.Start()
 
 	//可以添加一些服务器开启之前、开启之后的一些服务
+
+	time.Sleep(20*time.Second)
+}
+
+func(s *Server)AddRouter(id uint32,router iface.IRouter){
+	s.AddRouter(id,router)
+}
+
+func(s *Server)DelRouter(id uint32){
+	s.DelRouter(id)
 }
