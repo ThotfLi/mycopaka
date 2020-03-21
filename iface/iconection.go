@@ -8,9 +8,11 @@ type IConection interface{
 	//关闭当前conn
 	Stop()
 	//获取conn
-	GetConn()net.Conn
+	GetConn()        net.Conn
 	//获取addr
-	GetAddr()net.Addr
+	GetAddr()        net.Addr
 	//获取id
-	GetID()uint32
+	GetID()          uint32
+	//发送消息
+	SendMsg([]byte) (int,error)
 }

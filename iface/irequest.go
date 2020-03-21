@@ -4,17 +4,17 @@ package iface
 //每次从客户端接收到信息都要封装成请求对象发送给路由
 type IRequest interface{
 	//获取当前请求的connection
-	GetConnection()IConection
+	GetConnection()    IConection
 	//获取conn的addr
 	GetConnAddrString()string
 	//获取connID
-	GetConnID()uint32
+	GetConnID()        uint32
 
 	//获取当前请求信息
-	GetMsg()[]byte
+	GetMsg()           IMessage
 	//获取msgID
-	GetMsgID()uint32
+	GetMsgID()         uint32
 	//获取Msglen
-	GetMsgLen()int
+	GetMsgLen()        uint32
 
 }

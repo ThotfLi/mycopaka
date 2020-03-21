@@ -44,6 +44,7 @@ func(s *Server)Start(){
 		connectionObject := NewConnection(conn,AuToId,s.RouterHandle)
 		//启动conn任务
 		go connectionObject.Start()
+		AuToId += 1
 	}
 }
 
@@ -59,9 +60,9 @@ func(s *Server)Serve(){
 }
 
 func(s *Server)AddRouter(id uint32,router iface.IRouter){
-	s.AddRouter(id,router)
+	s.RouterHandle.AddRouter(id,router)
 }
 
 func(s *Server)DelRouter(id uint32){
-	s.DelRouter(id)
+	s.RouterHandle.DelRouter(id)
 }

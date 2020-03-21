@@ -2,6 +2,7 @@ package Realization
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"mycopaka/iface"
 )
@@ -43,20 +44,32 @@ func(c *Connection)StartReader(){
 	fmt.Println("[START]Connection.StartReader is running")
 	fmt.Println("conn addr:",c.GetAddr().String())
 	defer fmt.Println("exit conn id=",c.Id)
+
+	pk := Package{}
+
+	//持续接受客户端消息
 	for {
-		buf := make([]byte,512)
-		n,err := c.Conn.Read(buf)
-		if err != nil {
+		buf := make([]byte,pk.GetHeadLen())
+		n,err := io.ReadFull(c.GetConn(),buf)
+		if err != nil || n == 0 {
 			fmt.Println("[ERROR]recv faild,conn id:", c.Id)
 			c.SignOut <- true
 			break
 		}
-		fmt.Println(string(buf[:n]))
-		req := NewRequest(c,buf[:n])
+
+		//解包拿到msg.Data
+		newMsg := pk.UnPack(buf)
+		data := make([]byte,newMsg.GetMsgLen())
+		_,err = io.ReadFull(c.GetConn(),data)
+		if err != nil {
+			fmt.Println("[ERROR]recv msgData faild,conn id",c.Id)
+		}
+		newMsg.SetData(data)
+		//对从客户端接收的字节序列进行封装
+		//newMsg := NewMessage(buf[:n],1)
+		req := NewRequest(c,newMsg)
 		//根据路由选择运行router
 		go c.RouterHandle.RunRouter(req)
-
-
 
 	}
 }
@@ -83,4 +96,12 @@ func(c *Connection)GetAddr()net.Addr{
 
 func(c *Connection)GetID()uint32{
 	return c.Id
+}
+
+func(c *Connection)SendMsg(data []byte)(int,error){
+	if n,err := c.Conn.Write(data);err != nil {
+		return 0,err
+	}else {
+		return n, nil
+	}
 }

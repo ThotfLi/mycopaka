@@ -4,15 +4,17 @@ import (
 	"mycopaka/iface"
 )
 
+//每个request都是一个请求
+//每个请求封装后都交给路由系统处理
 type Request struct{
 	conn   iface.IConection
-	buf    []byte
+	msg    iface.IMessage
 }
 
-func NewRequest(conn iface.IConection,buf []byte)iface.IRequest{
+func NewRequest(conn iface.IConection,msg iface.IMessage)iface.IRequest{
 	return &Request{
 		conn: conn,
-		buf:  buf,
+		msg:  msg,
 	}
 }
 
@@ -28,14 +30,14 @@ func(r *Request)GetConnID()uint32{
 	return r.GetConnection().GetID()
 }
 
-func(r *Request)GetMsg()[]byte{
-	return r.buf
+func(r *Request)GetMsg()iface.IMessage{
+	return r.msg
 }
 
 func(r *Request)GetMsgID()uint32{
-	return 1
+	return r.msg.GetMsgID()
 }
 
-func(r *Request)GetMsgLen()int{
-	return len(r.buf)
+func(r *Request)GetMsgLen()uint32{
+	return r.msg.GetMsgLen()
 }
